@@ -135,9 +135,9 @@ GameObject:
   - component: {fileID: 455270338}
   - component: {fileID: 455270337}
   - component: {fileID: 455270340}
-  m_Layer: 0
-  m_Name: Megabot
-  m_TagString: Untagged
+  m_Layer: 7
+  m_Name: Player
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -296,6 +296,11 @@ MonoBehaviour:
   rb2D: {fileID: 0}
   moveSpeed: 0
   jumpForce: 0
+  boxCollider2D: {fileID: 0}
+  mask:
+    serializedVersion: 2
+    m_Bits: 8
+  canJump: 0
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -307,7 +312,7 @@ GameObject:
   - component: {fileID: 519420032}
   - component: {fileID: 519420031}
   - component: {fileID: 519420029}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -403,7 +408,7 @@ GameObject:
   - component: {fileID: 805758003}
   - component: {fileID: 805758002}
   - component: {fileID: 805758001}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Tilemap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
