@@ -13,15 +13,15 @@ public class Player : MonoBehaviour
 
     public LayerMask mask;
 
-    public RaycastHit2D hit2D;
-
-    public bool canJump;
+    public bool isGrounded;
+    public bool isJumping;
+    public bool canDoubleJump;
     void Start()
     {
         rb2D = GetComponent<Rigidbody2D>();
         boxCollider2D = GetComponent<BoxCollider2D>();
-        moveSpeed = 5f;
-        jumpForce = 10f;
+        moveSpeed = 7f;
+        jumpForce = 20f;
     }
 
     // Update is called once per frame
@@ -31,15 +31,24 @@ public class Player : MonoBehaviour
         rb2D.velocity = new Vector2(Input.GetAxisRaw("Horizontal") * moveSpeed, rb2D.velocity.y);
         if (Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, Vector2.down, 0.1f, mask))
         {
-            canJump = true;
+            isGrounded = true;
+            canDoubleJump = true;
+            isJumping = false;
         }
         else
         {
-            canJump = false;
+            isGrounded = false;
         }
-        if (Input.GetButtonDown("Jump") && canJump)
+        if (Input.GetButtonDown("Jump") && isGrounded)
         {
             rb2D.velocity = new Vector2(rb2D.velocity.x, jumpForce);
+            isJumping = true;
+        }
+        if (Input.GetButtonDown("Jump") && !isGrounded && canDoubleJump)
+        {
+            rb2D.velocity = new Vector2(rb2D.velocity.x, jumpForce / 1.5f);
+            canDoubleJump = false;
+            isJumping = true;
         }
     }
 }

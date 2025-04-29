@@ -5,17 +5,19 @@ TagManager:
   serializedVersion: 2
   tags:
   - Enemy
+  - Tilemap
+  - Background
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Jumpable Surface
+  - Ground
   - Water
   - UI
   - Main Camera
   - Player
   - Enemy
-  - 
+  - Background
   - 
   - 
   - 
