@@ -7,11 +7,13 @@ TagManager:
   - Enemy
   - Tilemap
   - Background
+  - OneWayPlatform
+  - SolidPlatform
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Ground
+  - 
   - Water
   - UI
   - Main Camera
@@ -19,8 +21,8 @@ TagManager:
   - Enemy
   - Background
   - 
-  - 
-  - 
+  - Solid Platform
+  - One Way Platform
   - 
   - 
   - 

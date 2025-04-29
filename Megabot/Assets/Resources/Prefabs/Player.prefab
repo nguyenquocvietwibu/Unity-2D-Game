@@ -175,7 +175,20 @@ MonoBehaviour:
   moveSpeed: 0
   jumpForce: 0
   boxCollider2D: {fileID: 0}
-  mask:
+  miniGroundCollider2D: {fileID: 0}
+  groundMask:
     serializedVersion: 2
     m_Bits: 8
-  canJump: 0
+  miniGroundMask:
+    serializedVersion: 2
+    m_Bits: 1024
+  playerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  enemyMask:
+    serializedVersion: 2
+    m_Bits: 256
+  isGrounded: 0
+  isMiniGrounded: 0
+  isJumping: 0
+  canDoubleJump: 0
