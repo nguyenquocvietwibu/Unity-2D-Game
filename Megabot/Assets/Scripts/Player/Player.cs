@@ -1,8 +1,5 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Tilemaps;
-using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -14,7 +11,7 @@ public class Player : MonoBehaviour
     public BoxCollider2D boxCollider2D;
     public CompositeCollider2D onWayPlatformdCollider2D;
     public Animator animator;
-
+    public SpriteRenderer spriteRenderer;
 
     public LayerMask jumpablePlatformsMask;
     public LayerMask oneWayPlatformMask;
@@ -22,9 +19,12 @@ public class Player : MonoBehaviour
     public LayerMask enemyMask;
 
     public bool isGrounded;
-    public bool isOneWayGrounded;
-    public bool isAirborne;
+    public bool isOnOneWayGrounded;
+    public bool isInOneWayGrounded;
+
+    //public bool isAirborne;
     public bool isJumping;
+    public bool isFalling;
     public bool canDoubleJump;
     public bool isRunning;
     public bool canCheckGround;
@@ -32,6 +32,8 @@ public class Player : MonoBehaviour
     public GameState gameState;
 
     public Vector2 movementVector2;
+
+    public bool isFacingLeft;
     public enum GameState
     {
         Start,
@@ -46,8 +48,19 @@ public class Player : MonoBehaviour
         animator = GetComponent<Animator>();
 
         moveSpeed = 8f;
-        jumpForce = 25f;
+        jumpForce = 21f;
 
+        spriteRenderer = GetComponent<SpriteRenderer>();
+
+        switch (spriteRenderer.flipX)
+        {
+            case true:
+                isFacingLeft = true;
+                break;
+            case false:
+                isFacingLeft = false;
+                break;
+        }
     }
 
     public void Anims()
@@ -63,21 +76,19 @@ public class Player : MonoBehaviour
             canDoubleJump = true;
             isJumping = false;
         }
-    }
-    // Update is called once per frame
-    void Update()
-    {
-        Move();
+
         if (isGrounded)
         {
             if (rb2D.velocity == Vector2.zero)
             {
                 Idle();
+                GroundCheck();
             }
 
             if (rb2D.velocity.x != 0f)
             {
                 Run();
+                GroundCheck();
             }
 
             if (Input.GetButtonDown("Jump"))
@@ -85,12 +96,75 @@ public class Player : MonoBehaviour
                 Jump();
             }
 
+            if (isOnOneWayGrounded)
+            {
+                if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S))
+                {
+                    StartCoroutine(DisableCollision());
+                }
+            }
+
         }
         else
         {
+
+            if (isFalling)
+            {
+                GroundCheck();
+            }
             if (Mathf.Approximately(rb2D.velocity.y, 0f) || rb2D.velocity.y <= 0f)
             {
-                Debug.Log("Giống");
+                Fall();
+            }
+            if (Input.GetButtonDown("Jump") && canDoubleJump)
+            {
+                DoubleJump();
+            }
+        }
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        InOneWayGroundCheck();
+        Move();
+        FlipXSpriteCheck();
+        if (isGrounded)
+        {
+
+            if (rb2D.velocity == Vector2.zero)
+            {
+                Idle();
+                GroundCheck();
+            }
+            
+            if (Input.GetAxisRaw("Horizontal") != 0)
+            {
+                Run();
+                GroundCheck();
+            }
+            if (isOnOneWayGrounded)
+            {
+                if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S))
+                {
+                    Debug.Log("True");
+                    StartCoroutine(DisableCollision());
+                }
+            }
+            if (Input.GetButtonDown("Jump"))
+            {
+                Jump();
+            }
+        }
+        else
+        {    
+            if (isFalling)
+            {
+                isJumping = false;
+                GroundCheck();
+            }
+            if (rb2D.velocity.y <= 0f)
+            {
                 Fall();
             }
             if (Input.GetButtonDown("Jump") && canDoubleJump)
@@ -103,36 +177,80 @@ public class Player : MonoBehaviour
     IEnumerator DisableCollision()
     {
         Physics2D.IgnoreCollision(boxCollider2D, onWayPlatformdCollider2D, true);
-        animator.Play("Fall");
-        yield return new WaitForSeconds(0.5f);
+        isInOneWayGrounded = true;
+        Fall();
+        yield return new WaitForSeconds(0.25f);
         Physics2D.IgnoreCollision(boxCollider2D, onWayPlatformdCollider2D, false);
     }
 
     public void GroundCheck()
     {
-        if (Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, Vector2.down, 0.1f, jumpablePlatformsMask))
+        if (!isJumping && !isInOneWayGrounded)
         {
-            isGrounded = true;
-            isAirborne = false;
-            canDoubleJump = true;
-            isJumping = false;
+            if (Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, Vector2.down, 0.1f, jumpablePlatformsMask))
+            {
+                isGrounded = true;
+                canDoubleJump = true;
+                isJumping = false;
+                isFalling = false;
+            }
+            else
+            {
+                isGrounded = false;
+
+            }
+            if (Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, Vector2.down, 0.1f, oneWayPlatformMask))
+            {
+                isOnOneWayGrounded = true;
+
+                canDoubleJump = true;
+                isJumping = false;
+            }
+            else
+            {
+                isOnOneWayGrounded = false;
+
+            }
+        }
+    }
+
+    public void InOneWayGroundCheck()
+    {
+        if (Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, Vector2.zero, 0, oneWayPlatformMask))
+        {
+            isInOneWayGrounded = true;
+            isGrounded = false;
+            isOnOneWayGrounded = false;
         }
         else
         {
-            isGrounded = false;
-            isAirborne = true;
+            isInOneWayGrounded = false;
+        }
+    }
+
+    public void FlipXSpriteCheck()
+    {
+        if (isFacingLeft && Input.GetAxisRaw("Horizontal") > 0)
+        {
+            isFacingLeft = false;
+            spriteRenderer.flipX = isFacingLeft;
+        }
+        else if (!isFacingLeft && Input.GetAxisRaw("Horizontal") < 0)
+        {
+            isFacingLeft = true;
+            spriteRenderer.flipX = isFacingLeft;
         }
     }
 
     public void Fall()
     {
+        isFalling = true;
+        isJumping = false;
+        isGrounded = false;
+        isOnOneWayGrounded = false;
         GroundCheck();
         animator.Play("Fall");
-        if (isGrounded)
-        {
-            Idle();
-        }
-       
+
     }
     public void Move()
     {
@@ -142,8 +260,7 @@ public class Player : MonoBehaviour
     {
         animator.Play("Jump");
         rb2D.velocity = new Vector2(rb2D.velocity.x, jumpForce);
-        
-        isAirborne = true;
+
         isJumping = true;
         isGrounded = false;
     }
@@ -152,12 +269,13 @@ public class Player : MonoBehaviour
     {
         rb2D.velocity = new Vector2(rb2D.velocity.x, jumpForce / 1.5f);
         animator.Play("Double Jump");
-        isAirborne = true;
         isJumping = true;
         isGrounded = false;
+        isOnOneWayGrounded = false;
         canDoubleJump = false;
+        GroundCheck();
     }
-  
+
     public void Idle()
     {
         GroundCheck();
@@ -168,7 +286,7 @@ public class Player : MonoBehaviour
     {
         GroundCheck();
         animator.Play("Run");
-        
+
     }
 }
 
