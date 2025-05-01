@@ -8,25 +8,30 @@ public class EnemyBullet : MonoBehaviour
     public GameObjectPool pool;
     public SpriteRenderer spriteRenderer;
     public Rigidbody2D rb2D;
+
+    private void Awake()
+    {
+        moveSpeed = 10f;
+        rb2D = GetComponent<Rigidbody2D>();
+        spriteRenderer = rb2D.GetComponent<SpriteRenderer>();
+        pool = GetComponentInParent<GameObjectPool>();
+    }
     private void Start()
     {
         
     }
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="isRightDirection"> trái là false, phải là true</param>
-    /// <param name=""></param>
-
-    public void Shoot(bool isRightDirection)
+    public void Shoot(bool isLeftDirection)
     {
-        if (isRightDirection)
+        if (isLeftDirection)
         {
-            rb2D.velocity = new Vector2(moveSpeed, rb2D.velocity.y);
+            
+            spriteRenderer.flipX = false;
+            rb2D.velocity = new Vector2(-moveSpeed, 0);
         }
         else
         {
-            rb2D.velocity = new Vector2(-moveSpeed, rb2D.velocity.y);
+            spriteRenderer.flipX = true; ;
+            rb2D.velocity = new Vector2(moveSpeed, 0);
         }
 
     }
@@ -34,6 +39,15 @@ public class EnemyBullet : MonoBehaviour
     {
         if (collision.CompareTag("SolidPlatform"))
         {
+            pool.GoInPool(gameObject);
+        }
+        else if (collision.CompareTag("Player"))
+        {
+            Player player = collision.gameObject.GetComponent<Player>();
+            if (player != null)
+            {
+                player.Damage(1f);
+            }
             pool.GoInPool(gameObject);
         }
     }

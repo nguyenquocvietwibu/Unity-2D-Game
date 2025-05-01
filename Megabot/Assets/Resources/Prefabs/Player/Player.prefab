@@ -172,35 +172,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9640cd47eaea7724aac6857d77ac471b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 0
-  jumpForce: 0
   rb2D: {fileID: 0}
-  boxCollider2D: {fileID: 0}
-  onWayPlatformdCollider2D: {fileID: 0}
+  spriteRenderer: {fileID: 0}
   animator: {fileID: 0}
-  jumpablePlatformsMask:
-    serializedVersion: 2
-    m_Bits: 0
-  oneWayPlatformMask:
-    serializedVersion: 2
-    m_Bits: 0
-  playerMask:
-    serializedVersion: 2
-    m_Bits: 128
-  enemyMask:
-    serializedVersion: 2
-    m_Bits: 256
-  isGrounded: 0
-  isOnOneWayGrounded: 0
+  boxCollider2D: {fileID: 0}
+  currentState: 0
+  isFacingLeft: 0
+  isDamaged: 0
+  isGrounded: 1
   isInOneWayGrounded: 0
-  isAirborne: 0
-  isJumping: 0
-  isFalling: 0
+  isOnOneWayGrounded: 0
+  canDamaged: 0
+  canMove: 0
+  canJump: 0
   canDoubleJump: 0
-  isRunning: 0
-  canCheckGround: 0
-  gameState: 0
-  movementVector2: {x: 0, y: 0}
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 6144
+  oneWayGroundMask:
+    serializedVersion: 2
+    m_Bits: 4096
+  stats: {fileID: 11400000, guid: d3794cb4d608684419fb74af2d7ae18c, type: 2}
 --- !u!95 &2566379962737148518
 Animator:
   serializedVersion: 5

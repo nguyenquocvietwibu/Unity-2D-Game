@@ -3,217 +3,163 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    // Start is called before the first frame update
-    public float moveSpeed;
-    public float jumpForce;
-
     public Rigidbody2D rb2D;
-    public BoxCollider2D boxCollider2D;
-    public CompositeCollider2D onWayPlatformdCollider2D;
-    public Animator animator;
     public SpriteRenderer spriteRenderer;
+    public Animator animator;
+    public BoxCollider2D boxCollider2D;
 
-    public LayerMask jumpablePlatformsMask;
-    public LayerMask oneWayPlatformMask;
-    public LayerMask playerMask;
-    public LayerMask enemyMask;
+    public PlayerStateMachine stateMachine;
 
-    public bool isGrounded;
-    public bool isOnOneWayGrounded;
-    public bool isInOneWayGrounded;
+    public PlayerStates currentState;
 
-    //public bool isAirborne;
-    public bool isJumping;
-    public bool isFalling;
-    public bool canDoubleJump;
-    public bool isRunning;
-    public bool canCheckGround;
-
-    public GameState gameState;
-
-    public Vector2 movementVector2;
+    public CompositeCollider2D oneWayGroundCollider2D;
 
     public bool isFacingLeft;
-    public enum GameState
-    {
-        Start,
-        Update,
-        Exit
-    }
+    public bool isDamaged;
+    public bool isGrounded;
+    public bool isInOneWayGrounded;
+    public bool isOnOneWayGrounded;
 
-    void Start()
+    public bool canDamaged;
+    public bool canMove;
+    public bool canJump;
+    public bool canDoubleJump;
+
+    public LayerMask enemyMask;
+
+
+    public LayerMask groundMask;
+    public LayerMask oneWayGroundMask;
+
+    public Coroutine coroutine;
+    public Stats stats;
+
+    private void Awake()
     {
         rb2D = GetComponent<Rigidbody2D>();
-        boxCollider2D = GetComponent<BoxCollider2D>();
-        animator = GetComponent<Animator>();
-
-        moveSpeed = 8f;
-        jumpForce = 22f;
-
         spriteRenderer = GetComponent<SpriteRenderer>();
 
-        switch (spriteRenderer.flipX)
+        if (spriteRenderer.flipX)
         {
-            case true:
-                isFacingLeft = true;
-                break;
-            case false:
-                isFacingLeft = false;
-                break;
-        }
-    }
-
-    public void Anims()
-    {
-        animator.Play("Idle");
-        animator.Play("Run");
-        animator.Play("Jump");
-        animator.Play("Fall");
-
-        if (Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, Vector2.down, 0.1f, jumpablePlatformsMask))
-        {
-            isGrounded = true;
-            canDoubleJump = true;
-            isJumping = false;
-        }
-
-        if (isGrounded)
-        {
-            if (rb2D.velocity == Vector2.zero)
-            {
-                Idle();
-                GroundCheck();
-            }
-
-            if (rb2D.velocity.x != 0f)
-            {
-                Run();
-                GroundCheck();
-            }
-
-            if (Input.GetButtonDown("Jump"))
-            {
-                Jump();
-            }
-
-            if (isOnOneWayGrounded)
-            {
-                if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S))
-                {
-                    StartCoroutine(DisableCollision());
-                }
-            }
-
+            isFacingLeft = true;
         }
         else
         {
-
-            if (isFalling)
-            {
-                GroundCheck();
-            }
-            if (Mathf.Approximately(rb2D.velocity.y, 0f) || rb2D.velocity.y <= 0f)
-            {
-                Fall();
-            }
-            if (Input.GetButtonDown("Jump") && canDoubleJump)
-            {
-                DoubleJump();
-            }
+            isFacingLeft = false;
         }
+
+        animator = GetComponent<Animator>();
+        boxCollider2D = GetComponent<BoxCollider2D>();
+
+        stateMachine = new PlayerStateMachine(this);
+        stateMachine.InitializeState(stateMachine.idleState);
+
+        canDamaged = true;
+        canMove = true;
+        canJump = true;
+        canDoubleJump = true;
+        stats = Instantiate(stats);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Start()
     {
-        InOneWayGroundCheck();
-        Move();
-        FlipXSpriteCheck();
-        if (isGrounded || isOnOneWayGrounded)
+
+    }
+
+    private void Update()
+    {
+        FacingCheck();
+        if (isDamaged)
         {
-
-            if (rb2D.velocity == Vector2.zero)
-            {
-                Idle();
-                GroundCheck();
-            }
-            
-            if (Input.GetAxisRaw("Horizontal") != 0 && !isJumping && !isFalling)
-            {
-                Run();
-                GroundCheck();
-            }
-            if ((Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) && Input.GetButtonDown("Jump") && isOnOneWayGrounded)
-            {
-                Debug.Log("True");
-                StartCoroutine(DisableCollision());
-            }
-            else if (Input.GetButtonDown("Jump"))
-            {
-                Jump();
-            }
+            stateMachine.ChangeState(stateMachine.hitState);
         }
-        else
-        {    
-            if (isFalling)
-            {
-                isJumping = false;
-                GroundCheck();
-            }
-            if (rb2D.velocity.y <= 0f)
-            {
-                Fall();
-            }
-            if (Input.GetButtonDown("Jump") && canDoubleJump)
-            {
-                DoubleJump();
-            }
+        if (canMove)
+        {
+            rb2D.velocity = new Vector2(Input.GetAxisRaw("Horizontal") * stats.moveSpeed, rb2D.velocity.y);
+        }
+        //if (!isGrounded)
+        //{
+        //    CastHitBox();
+        //}
+        stateMachine.UpdateState();
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            CastHitBox();
+            CastHurtBox();
         }
     }
 
-    IEnumerator DisableCollision()
+    public void Damage(float damage)
     {
-        Physics2D.IgnoreCollision(boxCollider2D, onWayPlatformdCollider2D, true);
-        isInOneWayGrounded = true;
-        Fall();
-        yield return new WaitForSeconds(0.25f);
-        Physics2D.IgnoreCollision(boxCollider2D, onWayPlatformdCollider2D, false);
+        if (canDamaged)
+        {
+            isDamaged = true;
+            stats.health -= damage;
+            coroutine = StartCoroutine(BecomeInvincibility(1.75f));
+        }
+    }
+
+    public void RemoveStunAndEnterIdle()
+    {
+        isDamaged = false;
+        stateMachine.ChangeState(stateMachine.idleState);
+    }
+
+    public IEnumerator BecomeInvincibility(float invincibilityTime)
+    {
+        float blinkDuration = 0.05f;
+        Color defaultColor = spriteRenderer.color;
+        Color opacityColor = defaultColor;
+        opacityColor.a = 0.4f;
+        canDamaged = false;
+        while (invincibilityTime >= 0)
+        {
+            spriteRenderer.color = opacityColor;
+            yield return new WaitForSeconds(blinkDuration);
+            invincibilityTime -= blinkDuration;
+            spriteRenderer.color = defaultColor;
+            yield return new WaitForSeconds(blinkDuration);
+            invincibilityTime -= blinkDuration;
+        }
+        canDamaged = true;
     }
 
     public void GroundCheck()
     {
-        if (!isJumping && !isInOneWayGrounded)
+        if (!isInOneWayGrounded)
         {
-            if (Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, Vector2.down, 0.1f, jumpablePlatformsMask))
+            RaycastHit2D hit2D = Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, Vector2.down, 0.025f, groundMask);
+            if (hit2D.collider != null)
             {
                 isGrounded = true;
                 canDoubleJump = true;
-                isJumping = false;
-                isFalling = false;
             }
             else
             {
                 isGrounded = false;
-
             }
-            if (Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, Vector2.down, 0.1f, oneWayPlatformMask))
+            hit2D = Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, Vector2.down, 0.025f, oneWayGroundMask);
+            if (hit2D.collider != null)
             {
                 isOnOneWayGrounded = true;
-
                 canDoubleJump = true;
-                isJumping = false;
             }
             else
             {
                 isOnOneWayGrounded = false;
-
             }
+
         }
     }
 
     public void InOneWayGroundCheck()
     {
-        if (Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, Vector2.zero, 0, oneWayPlatformMask))
+        RaycastHit2D hit2D = Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, Vector2.zero, 0f, oneWayGroundMask);
+        if (hit2D.collider != null)
         {
             isInOneWayGrounded = true;
             isGrounded = false;
@@ -225,7 +171,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    public void FlipXSpriteCheck()
+    public void FacingCheck()
     {
         if (isFacingLeft && Input.GetAxisRaw("Horizontal") > 0)
         {
@@ -239,52 +185,47 @@ public class Player : MonoBehaviour
         }
     }
 
-    public void Fall()
+    public IEnumerator DisableCollision(float disableTime)
     {
-        isFalling = true;
-        isJumping = false;
-        isGrounded = false;
-        isOnOneWayGrounded = false;
-        GroundCheck();
-        animator.Play("Fall");
-
-    }
-    public void Move()
-    {
-        rb2D.velocity = new Vector2(Input.GetAxisRaw("Horizontal") * moveSpeed, rb2D.velocity.y);
-    }
-    public void Jump()
-    {
-        animator.Play("Jump");
-        rb2D.velocity = new Vector2(rb2D.velocity.x, jumpForce);
-
-        isJumping = true;
-        isGrounded = false;
-        isOnOneWayGrounded = false;
+        Physics2D.IgnoreCollision(boxCollider2D, oneWayGroundCollider2D, true);
+        isInOneWayGrounded = true;
+        yield return new WaitForSeconds(disableTime);
+        Physics2D.IgnoreCollision(boxCollider2D, oneWayGroundCollider2D, false);
     }
 
-    public void DoubleJump()
+    public void CastHitBox()
     {
-        rb2D.velocity = new Vector2(rb2D.velocity.x, jumpForce / 1.5f);
-        animator.Play("Double Jump");
-        isJumping = true;
-        isGrounded = false;
-        isOnOneWayGrounded = false;
-        canDoubleJump = false;
-        GroundCheck();
+        RaycastHit2D raycastHit2D = Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, Vector2.down, 0.05f, enemyMask);
+        if (raycastHit2D.collider != null)
+        {
+            IDamage damageEnemy = raycastHit2D.collider.GetComponent<IDamage>();
+            if (damageEnemy != null)
+            {
+                damageEnemy.Damage(1f);
+                stateMachine.ChangeState(stateMachine.jumpState);
+            }
+        }
     }
 
-    public void Idle()
+    public void CastHurtBox()
     {
-        GroundCheck();
-        animator.Play("Idle");
-    }
+        Vector2[] directionsVector2Array = new Vector2[]
+        {
+            Vector2.up,
+            Vector2.left,
+            Vector2.right
+        };
 
-    public void Run()
-    {
-        GroundCheck();
-        animator.Play("Run");
-
+        foreach (Vector2 directionVector2 in directionsVector2Array)
+        {
+            RaycastHit2D raycastHit2D = Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, directionVector2, 0.05f, enemyMask);
+            if (raycastHit2D.collider != null)
+            {
+                Damage(1f);
+                break;
+            }
+        }
+        
     }
 }
 
