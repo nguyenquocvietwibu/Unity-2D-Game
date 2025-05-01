@@ -48,7 +48,7 @@ public class Player : MonoBehaviour
         animator = GetComponent<Animator>();
 
         moveSpeed = 8f;
-        jumpForce = 21f;
+        jumpForce = 22f;
 
         spriteRenderer = GetComponent<SpriteRenderer>();
 
@@ -129,7 +129,7 @@ public class Player : MonoBehaviour
         InOneWayGroundCheck();
         Move();
         FlipXSpriteCheck();
-        if (isGrounded)
+        if (isGrounded || isOnOneWayGrounded)
         {
 
             if (rb2D.velocity == Vector2.zero)
@@ -138,20 +138,17 @@ public class Player : MonoBehaviour
                 GroundCheck();
             }
             
-            if (Input.GetAxisRaw("Horizontal") != 0)
+            if (Input.GetAxisRaw("Horizontal") != 0 && !isJumping && !isFalling)
             {
                 Run();
                 GroundCheck();
             }
-            if (isOnOneWayGrounded)
+            if ((Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) && Input.GetButtonDown("Jump") && isOnOneWayGrounded)
             {
-                if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S))
-                {
-                    Debug.Log("True");
-                    StartCoroutine(DisableCollision());
-                }
+                Debug.Log("True");
+                StartCoroutine(DisableCollision());
             }
-            if (Input.GetButtonDown("Jump"))
+            else if (Input.GetButtonDown("Jump"))
             {
                 Jump();
             }
@@ -263,6 +260,7 @@ public class Player : MonoBehaviour
 
         isJumping = true;
         isGrounded = false;
+        isOnOneWayGrounded = false;
     }
 
     public void DoubleJump()
