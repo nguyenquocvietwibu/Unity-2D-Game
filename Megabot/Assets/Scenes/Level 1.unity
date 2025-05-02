@@ -817,6 +817,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player Virtual Guy
       objectReference: {fileID: 0}
+    - target: {fileID: 5927368070058112989, guid: 662f2057140b9e84bb0af4cae14b9cb5, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 6200000, guid: db686392b4a738e0a9069552065fb245, type: 2}
     - target: {fileID: 7892607764632423938, guid: 662f2057140b9e84bb0af4cae14b9cb5, type: 3}
       propertyPath: enemyMask.m_Bits
       value: 256
