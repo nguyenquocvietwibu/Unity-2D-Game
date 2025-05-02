@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 6503566300891636129}
   - component: {fileID: 6787624988787001616}
   m_Layer: 8
-  m_Name: Trunk
+  m_Name: Plant
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -78,7 +78,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: -5219337101871392587, guid: bf4df7b2c9cda4c44b372e2b47a5cb8f, type: 3}
+  m_Sprite: {fileID: 7059297670216363161, guid: 326dd6eeaa0ca144ca01194dbacf63fa, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -102,7 +102,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb2D: {fileID: 0}
-  bullet: {fileID: 5150632021827685292, guid: 5f89dac208bafd545a800644137bb2f8, type: 3}
+  bullet: {fileID: 5150632021827685292, guid: 96414098940117c498c7613798d43b2f, type: 3}
   boxCollider2D: {fileID: 6787624988787001616}
   spriteRenderer: {fileID: 0}
   animator: {fileID: 0}
@@ -120,7 +120,7 @@ MonoBehaviour:
   patrolCheckMask:
     serializedVersion: 2
     m_Bits: 2048
-  engageCheckRayDistance: 20
+  engageCheckRayDistance: 50
   patrolCheckGizmosRayDistance: 0
   patrolCheckRayDistance: 0
   leftPointShootVector3: {x: 0, y: 0, z: 0}
@@ -151,7 +151,7 @@ Rigidbody2D:
   m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 1
-  m_Constraints: 4
+  m_Constraints: 5
 --- !u!95 &6503566300891636129
 Animator:
   serializedVersion: 5
@@ -162,7 +162,7 @@ Animator:
   m_GameObject: {fileID: 2530246811386985913}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 5ae3ce8dfa2d7264885b3288016c9128, type: 2}
+  m_Controller: {fileID: 9100000, guid: 5bca73a491174464eb5aacfc0b50203f, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -205,18 +205,18 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.03, y: -0.24}
+  m_Offset: {x: 0, y: -0.32}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 4, y: 2}
+    oldSize: {x: 2.75, y: 2.625}
     newSize: {x: 4, y: 2}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1.16, y: 1.48}
+  m_Size: {x: 1, y: 1.99}
   m_EdgeRadius: 0
 --- !u!1 &6151643683900633525
 GameObject:
@@ -244,7 +244,7 @@ Transform:
   m_GameObject: {fileID: 6151643683900633525}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.73, y: -0.197, z: 0}
+  m_LocalPosition: {x: -0.493, y: 0.299, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

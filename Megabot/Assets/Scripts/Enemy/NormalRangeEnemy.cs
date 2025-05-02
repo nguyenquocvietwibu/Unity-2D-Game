@@ -63,7 +63,6 @@ public class NormalRangeEnemy : MonoBehaviour, IDamage
         {
             isFacingLeft = true;
         }
-        engageCheckRayDistance = 20f;
         patrolCheckRayDistance = 2f;
         coroutine = StartCoroutine(RandomPatrolRun());
     }
@@ -219,6 +218,8 @@ public class NormalRangeEnemy : MonoBehaviour, IDamage
 
         Gizmos.color = Color.black;
         Gizmos.DrawLine(start, start + ((isFacingLeft) ? Vector3.left * patrolCheckGizmosRayDistance : Vector3.right * patrolCheckGizmosRayDistance));
+        Gizmos.color = Color.black;
+        Gizmos.DrawLine(boxCollider2D.bounds.center + (Vector3)((isFacingLeft) ? Vector2.left * patrolCheckRayDistance : Vector2.right * patrolCheckRayDistance), boxCollider2D.bounds.center + (Vector3)((isFacingLeft) ? Vector2.left * patrolCheckRayDistance : Vector2.right * patrolCheckRayDistance) - new Vector3(0, patrolCheckRayDistance, 0));
     }
 
     public IEnumerator RandomPatrolRun()
