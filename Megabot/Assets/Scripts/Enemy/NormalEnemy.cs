@@ -31,7 +31,6 @@ public class NormalEnemy : MonoBehaviour , IDamage
     public float patrolCheckGizmosRayDistance;
     public float patrolCheckRayDistance;
 
-
     public Coroutine coroutine;
 
     // Start is called before the first frame update
@@ -53,8 +52,10 @@ public class NormalEnemy : MonoBehaviour , IDamage
         {
             isFacingLeft = true;
         }
-        engageCheckRayDistance = 30f;
-        patrolCheckRayDistance = 3f;
+
+        engageCheckRayDistance = 20f;
+        patrolCheckRayDistance = 2f;
+
         coroutine = StartCoroutine(RandomPatrolRun());
     }
 
@@ -70,6 +71,7 @@ public class NormalEnemy : MonoBehaviour , IDamage
 
         if (!isDamaged || !isDie)
         {
+
             CastEngagePlayerCheck();
             CastPatrolCheck();
             if (shouldAttack)
@@ -87,6 +89,7 @@ public class NormalEnemy : MonoBehaviour , IDamage
             else
             {
                 Idle();
+                FollowPlayer();
             }
         }
         if (transform.position.y <= -15f)
@@ -100,7 +103,7 @@ public class NormalEnemy : MonoBehaviour , IDamage
     public void Idle()
     {
         animator.Play("Idle");
-
+        rb2D.velocity = new Vector2(0f,0f);
     }
 
     public void Run()
@@ -112,13 +115,13 @@ public class NormalEnemy : MonoBehaviour , IDamage
         }
         else
         {
-
             rb2D.velocity = new Vector2(stats.moveSpeed, rb2D.velocity.y);
         }
     }
 
         public void Attack()
     {
+        rb2D.velocity = new Vector2(0f,0f);
         animator.Play("Run");
         if (isFacingLeft)
         {
@@ -179,7 +182,6 @@ public class NormalEnemy : MonoBehaviour , IDamage
         }
 
     }
-
     public void TurnBack()
     {
         shouldTurnBack = false;
@@ -194,6 +196,28 @@ public class NormalEnemy : MonoBehaviour , IDamage
             spriteRenderer.flipX = false;
         }
     }
+    public void FollowPlayer()
+    {
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null) return;
+
+        Vector3 playerPos = player.transform.position;
+        Vector3 enemyPos = transform.position;
+
+        // Kiểm tra xem player nằm bên trái hay phải
+        if (playerPos.x < transform.position.x && !isFacingLeft)
+        {
+            isFacingLeft = true;
+            spriteRenderer.flipX = false;
+        }
+        else if (playerPos.x > transform.position.x && isFacingLeft)
+        {
+            isFacingLeft = false;
+            spriteRenderer.flipX = true;
+        }
+    }
+
+
     private void OnDrawGizmos()
     {
         if (shouldAttack)
