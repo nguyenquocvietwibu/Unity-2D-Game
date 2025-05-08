@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: Player Stats
   m_EditorClassIdentifier: 
   health: 3
+  attack: 1
   moveSpeed: 8
   jumpForce: 22

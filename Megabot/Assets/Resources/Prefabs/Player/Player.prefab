@@ -189,7 +189,8 @@ MonoBehaviour:
   canDoubleJump: 0
   enemyMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
+  instance: {fileID: 7892607764632423938}
   groundMask:
     serializedVersion: 2
     m_Bits: 6144

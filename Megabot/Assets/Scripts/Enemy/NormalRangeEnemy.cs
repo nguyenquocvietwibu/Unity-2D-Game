@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NormalRangeEnemy : MonoBehaviour, IDamage
+public class NormalRangeEnemy : MonoBehaviour, IDamage, IStats
 {
     public Rigidbody2D rb2D;
     public EnemyBullet bullet;
@@ -36,6 +36,8 @@ public class NormalRangeEnemy : MonoBehaviour, IDamage
     public Vector3 rightPointShootVector3;
 
     public Coroutine coroutine;
+
+    public Stats Stats { get => stats; set => stats = value; }
 
     // Start is called before the first frame update
     void Start()

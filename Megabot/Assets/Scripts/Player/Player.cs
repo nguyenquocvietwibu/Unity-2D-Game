@@ -1,7 +1,8 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, IDamage, IStats
 {
     public Rigidbody2D rb2D;
     public SpriteRenderer spriteRenderer;
@@ -13,6 +14,7 @@ public class Player : MonoBehaviour
     public PlayerStates currentState;
 
     public CompositeCollider2D oneWayGroundCollider2D;
+
 
     public bool isFacingLeft;
     public bool isDamaged;
@@ -27,12 +29,13 @@ public class Player : MonoBehaviour
 
     public LayerMask enemyMask;
 
-
     public LayerMask groundMask;
     public LayerMask oneWayGroundMask;
 
     public Coroutine coroutine;
     public Stats stats;
+
+    public Stats Stats { get => stats; set => stats = value; }
 
     private void Awake()
     {
@@ -59,6 +62,8 @@ public class Player : MonoBehaviour
         canJump = true;
         canDoubleJump = true;
         stats = Instantiate(stats);
+        
+
     }
 
     private void Start()
@@ -93,13 +98,27 @@ public class Player : MonoBehaviour
         }
     }
 
+    public void Die()
+    {
+        DieAlert.instance.gameObject.SetActive(true);
+        animator.Play("Die");
+    }
+
     public void Damage(float damage)
     {
         if (canDamaged)
         {
-            isDamaged = true;
-            stats.health -= damage;
-            coroutine = StartCoroutine(BecomeInvincibility(1.75f));
+            if (stats.health > 1)
+            {
+                isDamaged = true;
+                stats.health -= damage;
+                coroutine = StartCoroutine(BecomeInvincibility(1.75f));
+            }
+            else
+            {
+                Die();
+            }
+            
         }
     }
 
@@ -201,7 +220,7 @@ public class Player : MonoBehaviour
             IDamage damageEnemy = raycastHit2D.collider.GetComponent<IDamage>();
             if (damageEnemy != null)
             {
-                damageEnemy.Damage(1f);
+                damageEnemy.Damage(stats.attack);
                 stateMachine.ChangeState(stateMachine.jumpState);
             }
         }
@@ -221,11 +240,24 @@ public class Player : MonoBehaviour
             RaycastHit2D raycastHit2D = Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, directionVector2, 0.05f, enemyMask);
             if (raycastHit2D.collider != null)
             {
-                Damage(1f);
+                float damage = raycastHit2D.collider.GetComponent<IStats>().Stats.attack;
+
+
+                Damage(damage);
                 break;
             }
         }
         
+    }
+
+    public void OnDisablePlayer()
+    {
+        gameObject.SetActive(false);
+    }
+
+    public void OnEnablePlayer()
+    {
+        gameObject.SetActive(true);
     }
 }
 

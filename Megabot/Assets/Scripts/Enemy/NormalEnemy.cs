@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NormalEnemy : MonoBehaviour , IDamage
+public class NormalEnemy : MonoBehaviour , IDamage, IStats 
 {
     public Rigidbody2D rb2D;
     public BoxCollider2D boxCollider2D;
@@ -32,6 +32,8 @@ public class NormalEnemy : MonoBehaviour , IDamage
     public float patrolCheckRayDistance;
 
     public Coroutine coroutine;
+
+    public Stats Stats { get => stats; set => stats = value; }
 
     // Start is called before the first frame update
     void Start()

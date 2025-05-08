@@ -7,6 +7,7 @@ using UnityEngine;
 public class Stats : ScriptableObject
 {
     public float health;
+    public float attack;
     public float moveSpeed;
     public float jumpForce;
 }
